@@ -1,6 +1,8 @@
 import dynamic from "next/dynamic";
 import axios from "axios";
 import { useState } from "react";
+import "bootstrap/dist/css/bootstrap.css";
+import Dropdown from "react-bootstrap/Dropdown";
 
 const ReactMediaRecorder = dynamic(
   () => import("react-media-recorder").then((mod) => mod.ReactMediaRecorder),
@@ -12,6 +14,11 @@ const ReactMediaRecorder = dynamic(
 export default function Page() {
   const [transcribedText, setTranscribedText] = useState(null);
   const [recordingState, setRecordingState] = useState("not-recording");
+  const options = ["hy", "lt", "ru"];
+  const [selected, setSelected] = useState(options[0]);
+  const submit = () => {
+    console.log(selected);
+  };
   return (
     <div>
       <ReactMediaRecorder
@@ -38,6 +45,22 @@ export default function Page() {
                 ? "Start Recording"
                 : "Stop Recording"}
             </button>
+
+            <form>
+              <select
+                value={selected}
+                onChange={(e) => setSelected(e.target.value)}
+              >
+                {options.map((value) => (
+                  <option value={value} key={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+              <button type="button" onClick={submit}>
+                Submit
+              </button>
+            </form>
           </div>
         )}
         onStop={async (mediaBlobUrl, blob) => {
@@ -52,7 +75,7 @@ export default function Page() {
           console.log("API KEY:", apiKey);
           const response = await axios.post(
             "https://api.openai.com/v1/audio/transcriptions ",
-            { file: audioFile, model: "whisper-1", language: "hy" },
+            { file: audioFile, model: "whisper-1", language: selected },
             {
               headers: {
                 "Content-Type": "multipart/form-data",
